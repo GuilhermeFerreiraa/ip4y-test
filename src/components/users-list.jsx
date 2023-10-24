@@ -6,8 +6,6 @@ import Animated, {
 import UserCard from "./user-card";
 
 export default function UsersList({ data }) {
-  
-
   return (
     <Animated.ScrollView
       layout={Layout}
