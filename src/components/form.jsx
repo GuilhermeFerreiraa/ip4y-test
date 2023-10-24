@@ -6,7 +6,6 @@ import {
   cpfFormatted,
   cpfValidate,
   emailValidate,
-  formatedCPF,
 } from "~helpers/utils";
 import InputIcon from "./InputIcon";
 import { TouchableOpacity, View } from "react-native";
@@ -175,7 +174,7 @@ export default function Form() {
             </View>
             <View className="mt-12 items-center justify-center">
               <Link href="/Users">
-                <TextRegular className="text-white underline text-sm">
+                <TextRegular className="text-white underline text-base">
                   Ver todos os registros
                 </TextRegular>
               </Link>
