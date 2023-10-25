@@ -3,7 +3,7 @@
     "name": "ip4y",
     "slug": "ip4y",
     "version": "1.0.0",
-    "scheme": "your-app-scheme",
+    "scheme": "ip4y",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -20,10 +20,14 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0B0B0B"
-      }
+      },
+      "package": "com.guilherme_ferreira.ip4y"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "experiments": {
+      "typedRoutes": true
     },
     "plugins": ["expo-router"]
   }

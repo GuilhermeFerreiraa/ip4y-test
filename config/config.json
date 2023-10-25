@@ -1,0 +1,10 @@
+{
+  "production": {
+    "username": "root",
+    "password": "",
+    "database": "ip4y",
+    "host": "localhost",
+    "dialect": "mysql"
+  },
+  "urlNgrok:": "https://3570-191-5-67-20.ngrok-free.app"
+}
