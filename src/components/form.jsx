@@ -1,185 +1,157 @@
 import { Formik } from "formik";
+
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
-import { date, number, object, string } from "yup";
-import {
-  cpfFormatted,
-  cpfValidate,
-  emailValidate,
-} from "~helpers/utils";
-import InputIcon from "./InputIcon";
-import { TouchableOpacity, View } from "react-native";
-import { TextMedium, TextRegular, TextSemibold } from "./Text";
-import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
 
-export default function Form() {
-  const initialData = {
-    document: "",
-    name: "",
-    lastName: "",
-    birthDate: "",
-    email: "",
-    gender: "",
-  };
+import { View } from "react-native";
 
-  let userSchema = object({
-    name: string().required(),
-    age: number().required().positive().integer(),
-    email: string().email(),
-    website: string().url().nullable(),
-    createdOn: date().default(() => new Date()),
-  });
+import useHomeHook from "~app/hooks/useHomeHook";
+
+import { formatDateToUser } from "~helpers/utils";
+import { validationSchema } from "~helpers/validationSchema";
+
+import Button from "./button";
+
+import Dropdown from "./dropdown";
+
+import { TextRegular, TextSemibold } from "./Text";
+import ErrorMessage from "./error-message";
+import InputGroup from "./input-group";
+import Loader from "./loader";
+
+export default function Form() {
+  const { onSubmit, user, isLoading, setIsLoading, statusMessage } = useHomeHook();
 
   return (
     <Formik
-      initialValues={initialData}
-      validete={userSchema}
-      onSubmit={() => {}}
+      initialValues={user}
+      validationSchema={validationSchema}
+      onSubmit={(values) => {
+        let data = {
+          gender: user.gender,
+          ...values,
+        };
+        onSubmit(data);
+      }}
     >
-      {({ handleChange, handleBlur, handleSubmit, values }) => (
-        <View className="flex-1 items-center justify-start mt-8">
-          <KeyboardAwareScrollView className="w-[100%] min-h-screen mx-auto flex-1 p-3 m-0">
+      {({ values, handleChange, handleSubmit, errors, touched, resetForm }) => (
+        <View className="items-center justify-start mt-4">
+          {statusMessage && (
+            <TextSemibold textClassName="text-green-400 text-xl">
+              Registro criado com sucesso!
+            </TextSemibold>
+          )}
+          <KeyboardAwareScrollView className="w-[100%] mx-auto p-2 m-0">
             <View className="flex-col flex-1 bg-background rounded-lg px-2 py-6">
-              <View className="flex items-center justify-around flex-row max-w-full">
-                {/* document */}
+              <View className="my-2 flex items-center justify-around flex-row max-w-full">
                 <View className="flex-col w-[45%]">
-                  <TextSemibold className="text-sm text-white">
-                    CPF*
-                  </TextSemibold>
-                  <InputIcon
-                    label="document"
-                    placeholder="1234567890"
-                    returnKeyType="done"
-                    value={cpfFormatted(values.document)}
-                    keyboardType="decimal-pad"
-                    error={values.document && !cpfValidate(values.document)}
-                    error_text={"CPF Inválido!"}
+                  <InputGroup
+                    title="CPF*"
                     maxLength={14}
-                    classname="w-full"
+                    name="document"
+                    value={values.document}
+                    placeholder="000.000.000-00"
+                    keyboardType="decimal-pad"
                     onChange={handleChange("document")}
                   />
+                  {touched.document && errors.document && (
+                    <ErrorMessage text={errors.document} />
+                  )}
                 </View>
-                {/* name */}
-                <View className="flex-col w-[45%]">
-                  <TextSemibold className="text-sm text-white">
-                    Nome*
-                  </TextSemibold>
 
-                  <InputIcon
-                    label="name"
-                    value={values.name}
-                    keyboardType="default"
+                <View className="flex-col w-[45%]">
+                  <InputGroup
+                    title="Nome*"
                     placeholder="Seu nome"
-                    classname="w-full"
-                    returnKeyType="done"
+                    name="name"
                     onChange={handleChange("name")}
+                    value={values.name ? values.name : ""}
                   />
+
+                  {touched.name && errors.name && (
+                    <ErrorMessage text={errors.name} />
+                  )}
                 </View>
               </View>
 
-              <View className="flex items-center justify-around flex-row max-w-full">
-                {/* email */}
+              <View className="my-2 flex items-center justify-around flex-row max-w-full">
                 <View className="flex-col w-[45%]">
-                  <TextSemibold className="text-sm text-white">
-                    E-mail*
-                  </TextSemibold>
-
-                  <InputIcon
-                    label="email"
+                  <InputGroup
+                    title="E-mail*"
+                    name="email"
                     value={values.email}
-                    returnKeyType="done"
                     placeholder="email@email.com"
                     keyboardType="email-address"
-                    error_text={"*E-mail Inválido!"}
                     onChange={handleChange("email")}
-                    error={values.email && !emailValidate(values.email)}
-                    classname="w-full"
+                    classname="w-full lowercase"
                   />
+
+                  {touched.email && errors.email && (
+                    <ErrorMessage text={errors.email} />
+                  )}
                 </View>
 
-                {/* lastName */}
                 <View className="flex-col w-[45%]">
-                  <TextSemibold className="text-sm text-white">
-                    Sobrenome*
-                  </TextSemibold>
-                  <InputIcon
-                    label="lastName"
-                    value={values.lastName}
-                    keyboardType="default"
+                  <InputGroup
+                    title="Sobrenome*"
+                    name="lastName"
                     placeholder="Seu Sobrenome"
-                    classname="w-full"
-                    returnKeyType="done"
+                    value={values.lastName}
                     onChange={handleChange("lastName")}
                   />
+
+                  {touched.lastName && errors.lastName && (
+                    <ErrorMessage text={errors.lastName} />
+                  )}
                 </View>
               </View>
 
-              <View className="flex items-center justify-around flex-row max-w-full">
+              <View className="my-2 flex items-center justify-around flex-row max-w-full">
                 <View className="flex-col w-[45%]">
-                  <TextSemibold className="text-sm text-white">
-                    Gênero*
-                  </TextSemibold>
-
-                  <InputIcon
-                    label="gender"
+                  <Dropdown
                     value={values.gender}
-                    returnKeyType="done"
-                    placeholder="Insira seu gênero"
-                    error_text={"*E-mail Inválido!"}
-                    onChange={handleChange("email")}
-                    error={values.email && !emailValidate(values.email)}
-                    classname="w-full"
+                    onChange={(itemValue) => {
+                      handleChange("gender")(itemValue);
+                    }}
                   />
+
+                  {touched.gender && !user.gender && (
+                    <ErrorMessage text={errors.gender} />
+                  )}
                 </View>
 
-                {/* lastName */}
                 <View className="flex-col w-[45%]">
-                  <TextSemibold className="text-sm text-white">
-                    Data de nascimento*
-                  </TextSemibold>
-                  <InputIcon
-                    label="birthdate"
-                    value={values.birthDate}
-                    placeholder="00/00/0000"
-                    classname="w-full"
-                    returnKeyType="done"
-                    onChange={handleChange("lastName")}
+                  <InputGroup
+                    title="Data de nascimento*"
+                    name="birthdate"
+                    value={formatDateToUser(values.birthdate)}
+                    placeholder="dd/mm/aaaa"
+                    keyboardType="numeric"
+                    onChange={handleChange("birthdate")}
                   />
+
+                  {touched.birthdate && errors.birthdate && (
+                    <ErrorMessage text={errors.birthdate} />
+                  )}
                 </View>
               </View>
-
-              {/* buttons */}
             </View>
+
             <View className="flex items-center justify-around flex-row mt-4 max-w-full">
-              <LinearGradient
-                className="h-10 w-[45%] border-none items-center justify-center"
-                colors={["#00C59F", "#00D636"]}
-                end={{ x: 0.1, y: 0.2 }}
-              >
-                <TouchableOpacity className="w-[97.5%] bg-background items-center py-[9px]">
-                  <TextMedium textClassName="text-white">Inserir</TextMedium>
-                </TouchableOpacity>
-              </LinearGradient>
-
-              <LinearGradient
-                className="h-10 w-[45%] border-none items-center justify-center"
-                colors={["#00C59F", "#00D636"]}
-                end={{ x: 0.1, y: 0.2 }}
-              >
-                <TouchableOpacity className="w-[97.5%] bg-background items-center py-[9px]">
-                  <TextMedium textClassName="text-white">Recomeçar</TextMedium>
-                </TouchableOpacity>
-              </LinearGradient>
+              <Button text="Inserir" onPress={handleSubmit} />
+              <Button text="Recomeçar" onPress={resetForm} />
             </View>
+
             <View className="mt-12 items-center justify-center">
-              <Link href="/Users">
-                <TextRegular className="text-white underline text-base">
+              <Link href="/users">
+                <TextRegular textClassName="text-white underline text-base">
                   Ver todos os registros
                 </TextRegular>
               </Link>
             </View>
           </KeyboardAwareScrollView>
+          <Loader isOpen={isLoading} setIsOpen={setIsLoading} />
         </View>
       )}
     </Formik>

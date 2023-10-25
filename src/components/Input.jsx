@@ -1,6 +1,6 @@
 import { TextInput } from "react-native";
 
-export default function InputIcon({
+export default function Input({
   classname,
   name,
   placeholder,
