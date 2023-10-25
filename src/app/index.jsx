@@ -1,14 +1,18 @@
 import { Stack } from "expo-router";
+
 import { ImageBackground, View } from "react-native";
 
 import backgroundTexture from "../../assets/texture_bg.png";
 
+import { TextRegular, TextSemibold } from "~components/Text/index";
+
+import Form from "~components/form";
+
+import GradientLine from "~components/gradient-line";
+
 import LogoTitle from "~components/logo";
 
-import { LinearGradient } from "expo-linear-gradient";
-
-import { TextRegular, TextSemibold } from "~components/Text/index";
-import Form from "~components/form";
+import SectionTitle from "~components/section-title";
 
 const headerOptions = {
   title: "iP4y | Instituição de Pagamento",
@@ -31,17 +35,11 @@ export default function Home() {
         style={{ objectFit: "cover" }}
         source={backgroundTexture}
       >
-        <View className="flex items-start pl-6 pt-6">
-          <TextSemibold textClassName="text-4xl text-white">
-            Criar Conta
-          </TextSemibold>
+        <View className="w-full flex items-start pl-6 pt-4">
+          <SectionTitle text="Criar Conta" classname="text-4xl text-white" />
+          <GradientLine classname="max-w-[60%] mt-2 h-[1px]" />
           <View>
-            <LinearGradient
-              className="h-[2px] rounded-full border-none mt-2"
-              colors={["#00D636", "#00C59F"]}
-              end={{ x: 0.1, y: 0.2 }}
-            />
-            <TextRegular textClassName="text-base text-white mt-4">
+            <TextRegular textClassName="text-base text-white mt-2">
               <TextSemibold>Soluções pensadas</TextSemibold> especialmente para{" "}
               {"\n"} agilizar a <TextSemibold>sua rotina</TextSemibold> e da{" "}
               <TextSemibold>sua empresa</TextSemibold>!
