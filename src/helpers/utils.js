@@ -74,9 +74,68 @@ const isUnderThanEighteen = (age) => {
   return ageDifferenceInYears < 18;
 };
 
+const formatDateToUser = (value) => {
+  const unmaskedValue = value.replace(/\D/g, "");
+
+  if (unmaskedValue.length <= 2) {
+    return unmaskedValue;
+  }
+  if (unmaskedValue.length <= 4) {
+    return `${unmaskedValue.slice(0, 2)}-${unmaskedValue.slice(2)}`;
+  }
+
+  return `${unmaskedValue.slice(0, 2)}/${unmaskedValue.slice(
+    2,
+    4
+  )}/${unmaskedValue.slice(4, 8)}`;
+};
+
+const dateToUserString = (date) => {
+  if (date instanceof Date) {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
+  return date; // Se não for um objeto Date, retorne o valor original
+};
+
+function formatToDatabaseDate(date) {
+  if (!date) return null;
+
+  const parts = date.split("/");
+  if (parts.length !== 3) return null;
+
+  const [day, month, year] = parts;
+  const formattedDate = `${year}-${month}-${day}`;
+
+  return formattedDate;
+}
+
+const isValidDate = (dateString) => {
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) return false;
+
+  const parts = dateString.split("/");
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10);
+  const year = parseInt(parts[2], 10);
+
+  if (year < 1000 || year > 3000 || month === 0 || month > 12) return false;
+
+  const maxDay = new Date(year, month, 0).getDate();
+  if (day === 0 || day > maxDay) return false;
+
+  return true;
+};
+
 export {
   cpfValidate,
   cpfFormatted,
+  isValidDate,
+  dateToUserString,
+  formatToDatabaseDate,
+  formatDateToUser,
   emailValidate,
   birthdateFormatted,
   isUnderThanEighteen,
