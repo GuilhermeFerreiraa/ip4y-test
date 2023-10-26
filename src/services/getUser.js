@@ -1,5 +1,5 @@
 import axios from "axios";
-import { baseURL } from "./createUser";
+import { baseURL } from "~helpers/utils";
 
 export const getUser = (id) => {
   try {

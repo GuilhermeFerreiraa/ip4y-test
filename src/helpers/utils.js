@@ -1,142 +1,105 @@
-const cpfValidate = (document) => {
+export const baseURL = "https://5056-191-5-67-20.ngrok-free.app";
+
+const isValidCPF = (document) => {
   const cleanedCPF = document.replace(/\D/g, "");
+  if (!isValidCPFFormat(cleanedCPF)) return false;
+  return isValidCPFDigits(cleanedCPF);
+};
 
-  if (cleanedCPF.length !== 11 || /^(\d)\1+$/.test(cleanedCPF)) {
-    return false;
-  }
+const isValidCPFFormat = (cleanedCPF) => {
+  return cleanedCPF.length === 11 && !/^(\d)\1+$/.test(cleanedCPF);
+};
 
-  const getRemainder = (sum) => (sum * 10) % 11;
+const isValidCPFDigits = (cleanedCPF) => {
+  const calculateRemainder = (sum) => (sum * 10) % 11;
 
   let sum = 0;
   for (let i = 1; i <= 9; i++) {
-    sum += parseInt(cleanedCPF.substring(i - 1, i)) * (11 - i);
+    sum += parseInt(cleanedCPF[i - 1]) * (11 - i);
   }
 
-  let remainder = getRemainder(sum);
+  let remainder = calculateRemainder(sum);
+  remainder = remainder === 10 || remainder === 11 ? 0 : remainder;
 
-  if (remainder === 10 || remainder === 11) {
-    remainder = 0;
-  }
-
-  if (remainder !== parseInt(cleanedCPF.substring(9, 10))) {
-    return false;
-  }
+  if (remainder !== parseInt(cleanedCPF[9])) return false;
 
   sum = 0;
   for (let i = 1; i <= 10; i++) {
-    sum += parseInt(cleanedCPF.substring(i - 1, i)) * (12 - i);
+    sum += parseInt(cleanedCPF[i - 1]) * (12 - i);
   }
 
-  remainder = getRemainder(sum);
+  remainder = calculateRemainder(sum);
+  remainder = remainder === 10 || remainder === 11 ? 0 : remainder;
 
-  if (remainder === 10 || remainder === 11) {
-    remainder = 0;
-  }
-
-  if (remainder !== parseInt(cleanedCPF.substring(10, 11))) {
-    return false;
-  }
-
-  return true;
+  return remainder === parseInt(cleanedCPF[10]);
 };
 
-const cpfFormatted = (document) => {
+const formatCPF = (document) => {
   const cleanedCPF = document?.replace(/\D/g, "");
-
-  const formattedCPF = cleanedCPF?.replace(
-    /^(\d{3})(\d{3})(\d{3})(\d{2})$/,
-    "$1.$2.$3-$4"
-  );
-
-  return formattedCPF;
+  return cleanedCPF?.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4");
 };
 
-const emailValidate = (email) => {
+const isValidEmail = (email) => {
   const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-
   return emailRegex.test(email);
 };
 
-const birthdateFormatted = (date) => {
-  const day = date.getDate().toString().padStart(2, "0");
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
+const formatDate = (date) => {
+  const options = { day: "2-digit", month: "2-digit", year: "numeric" };
+  return new Date(date).toLocaleDateString("pt-BR", options);
 };
-
-const isUnderThanEighteen = (age) => {
-  const currentDate = new Date();
-  const birthDate = new Date(age);
-  const ageDifferenceInMilliseconds = currentDate - birthDate;
-  const ageDifferenceInYears =
-    ageDifferenceInMilliseconds / (1000 * 60 * 60 * 24 * 365.25);
-
-  return ageDifferenceInYears < 18;
-};
-
-const formatDateToUser = (value) => {
-  const unmaskedValue = value.replace(/\D/g, "");
-
-  if (unmaskedValue.length <= 2) {
-    return unmaskedValue;
-  }
-  if (unmaskedValue.length <= 4) {
-    return `${unmaskedValue.slice(0, 2)}-${unmaskedValue.slice(2)}`;
-  }
-
-  return `${unmaskedValue.slice(0, 2)}/${unmaskedValue.slice(
-    2,
-    4
-  )}/${unmaskedValue.slice(4, 8)}`;
-};
-
-const dateToUserString = (date) => {
-  if (date instanceof Date) {
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  }
-
-  return date; // Se não for um objeto Date, retorne o valor original
-};
-
-function formatToDatabaseDate(date) {
-  if (!date) return null;
-
-  const parts = date.split("/");
-  if (parts.length !== 3) return null;
-
-  const [day, month, year] = parts;
-  const formattedDate = `${year}-${month}-${day}`;
-
-  return formattedDate;
-}
 
 const isValidDate = (dateString) => {
   if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) return false;
 
-  const parts = dateString.split("/");
-  const day = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10);
-  const year = parseInt(parts[2], 10);
-
+  const [day, month, year] = dateString.split("/").map(Number);
   if (year < 1000 || year > 3000 || month === 0 || month > 12) return false;
-
   const maxDay = new Date(year, month, 0).getDate();
   if (day === 0 || day > maxDay) return false;
-
   return true;
 };
 
+function formatDateToDDMMYYYY(date) {
+  if (!isValidDateObject(date)) {
+    throw new Error("O argumento deve ser um objeto Date válido.");
+  }
+
+  const day = padZeroes(date.getDate());
+  const month = padZeroes(date.getMonth() + 1);
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`;
+}
+
+function isValidDateObject(date) {
+  return date instanceof Date && !isNaN(date);
+}
+
+function padZeroes(number) {
+  return String(number).padStart(2, "0");
+}
+
+function formatDateToString(data) {
+  const dataObj = new Date(data);
+  const day = String(dataObj.getDate()).padStart(2, "0");
+  const month = String(dataObj.getMonth() + 1).padStart(2, "0");
+  const year = dataObj.getFullYear();
+
+  return `${year}-${month}-${day}`;
+}
+
+function validateEmail(email) {
+  const regex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  return regex.test(email);
+}
+
 export {
-  cpfValidate,
-  cpfFormatted,
+  formatCPF,
+  formatDate,
+  formatDateToDDMMYYYY,
+  formatDateToString,
+  isValidCPF,
   isValidDate,
-  dateToUserString,
-  formatToDatabaseDate,
-  formatDateToUser,
-  emailValidate,
-  birthdateFormatted,
-  isUnderThanEighteen,
+  isValidEmail,
+  validateEmail,
 };

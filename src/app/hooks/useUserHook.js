@@ -1,18 +1,19 @@
-import { useGlobalSearchParams, router } from "expo-router";
+import { router, useGlobalSearchParams } from "expo-router";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useState } from "react";
 import { Platform } from "react-native";
 
 import { deleteUser } from "~services/deleteUser";
-import { getUser } from "~services/getUser";
 import { updateUser } from "~services/updateUser";
 
 export default function useUser() {
   const { id } = useGlobalSearchParams();
   const [isLoading, setIsLoading] = useState(false);
-
+  const [modalVisible, setModalVisible] = useState(false);
+  const [statusMessage, setStatusMessage] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [user, setUser] = useState({
-    id: "",
     name: "",
     lastName: "",
     document: "",
@@ -21,20 +22,36 @@ export default function useUser() {
     gender: "",
   });
 
-  const [modalVisible, setModalVisible] = useState(false);
+  const handleUpdateUser = (values) => {
+    function findModifiedAttributes(originalObject, updatedObject) {
+      const modifiedAttributes = {};
 
-  const [modalEditVisible, setModalEditVisible] = useState(false);
+      for (const key in originalObject) {
+        if (originalObject[key] !== updatedObject[key]) {
+          modifiedAttributes[key] = updatedObject[key];
+        }
+      }
 
-  const [showDatePicker, setShowDatePicker] = useState(false);
+      return modifiedAttributes;
+    }
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
+    setUser({ ...user, ...values });
+    const changes = findModifiedAttributes(user, values);
 
-  const handleUpdateUser = async () => {
+    const nonEmptyChanges = Object.keys(changes).reduce((acc, key) => {
+      if (changes[key] !== undefined && changes[key] !== "") {
+        acc[key] = changes[key];
+      }
+      return acc;
+    }, {});
+
     setIsLoading(true);
-    const res = await updateUser(user);
 
-    console.log(res);
+    console.log(nonEmptyChanges, id);
+    updateUser(nonEmptyChanges, id);
     setIsLoading(!true);
+    setStatusMessage(!statusMessage);
+    router.replace("/");
   };
 
   const handleDateChange = (e, selectedDate) => {
@@ -44,7 +61,7 @@ export default function useUser() {
       setSelectedDate(selectedDate);
 
       const formattedDate = format(selectedDate, "yyyy-MM-dd");
-      handleChange("birthdate")(formattedDate);
+      return formattedDate;
     }
   };
 
@@ -63,16 +80,6 @@ export default function useUser() {
 
   const openGenderPicker = () => pickerRef.current.focus();
 
-  useEffect(() => {
-    async function fetchData() {
-      const res = await getUser(id);
-
-      setUser(res);
-    }
-
-    fetchData();
-  }, []);
-
   return {
     handleDeleteRegister,
     handleUpdateUser,
@@ -82,6 +89,7 @@ export default function useUser() {
     isLoading,
     setIsLoading,
     user,
+    id,
     modalVisible,
     handleDateChange,
     setModalVisible,
@@ -89,7 +97,6 @@ export default function useUser() {
     setShowDatePicker,
     selectedDate,
     setSelectedDate,
-    modalEditVisible,
-    setModalEditVisible,
+    statusMessage,
   };
 }

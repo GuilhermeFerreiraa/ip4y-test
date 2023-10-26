@@ -2,40 +2,27 @@ import * as yup from "yup";
 import { isValidDate } from "./utils";
 
 export const validationSchema = yup.object().shape({
-  name: yup.string().required("*nome é obrigatório"),
-  lastName: yup.string().required("*sobrenome é obrigatório"),
+  name: yup.string().required("*Nome é obrigatório"),
+  lastName: yup.string().required("*Sobrenome é obrigatório"),
   email: yup
     .string()
-    .email("Digite um email válido")
-    .required("*email é obrigatório"),
-  document: yup
-    .string()
-    // .matches(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF inválido")
-    // .test("unique-cpf", "CPF já cadastrado", async function (value) {
-    //   const response = await fetch("http://192.168.1.104:80/", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({ document: value }),
-    //   });
-
-    //   if (response.ok) {
-    //     const data = await response.json();
-    //     if (data.exists) {
-    //       return false;
-    //     }
-    //   }
-
-    //   return true;
-    // })
-    .required("*CPF é obrigatório"),
-  birthdate: yup
-    .string()
-    .test("is-valid-date", "Data inválida", (value) => isValidDate(value))
-    .required("*data de nasc. é obrigatória"),
+    .email("*E-mail inválido")
+    .required("*E-mail é obrigatório"),
+  document: yup.string().required("*CPF é obrigatório"),
+  birthdate: yup.string().required("*Data de nasc. é obrigatória"),
   gender: yup
     .string()
-    .required("*gênero é obrigatório")
+    .oneOf(["Masculino", "Feminino", "Outros"], "Selecione um gênero válido")
+    .required("*Gênero é obrigatório"),
+});
+
+export const validationSchemaEdit = yup.object().shape({
+  name: yup.string().required("*Nome é obrigatório"),
+  lastName: yup.string(),
+  email: yup.string().email("*E-mail inválido"),
+  document: yup.string(),
+  birthdate: yup.string(),
+  gender: yup
+    .string()
     .oneOf(["Masculino", "Feminino", "Outros"], "Selecione um gênero válido"),
 });

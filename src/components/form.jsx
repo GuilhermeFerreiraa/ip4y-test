@@ -4,42 +4,66 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 
 import { Link } from "expo-router";
 
-import { View } from "react-native";
+import { Keyboard, TouchableOpacity, View } from "react-native";
 
 import useHomeHook from "~app/hooks/useHomeHook";
 
-import { formatDateToUser } from "~helpers/utils";
+import { formatCPF, formatDate } from "~helpers/utils";
 import { validationSchema } from "~helpers/validationSchema";
 
 import Button from "./button";
 
 import Dropdown from "./dropdown";
 
-import { TextRegular, TextSemibold } from "./Text";
+import RNDateTimePicker from "@react-native-community/datetimepicker";
+import useUser from "~app/hooks/useUserHook";
+import { TextLight, TextRegular, TextSemibold } from "./Text";
 import ErrorMessage from "./error-message";
 import InputGroup from "./input-group";
 import Loader from "./loader";
+import { CreateUser } from "~services/createUser";
 
 export default function Form() {
-  const { onSubmit, user, isLoading, setIsLoading, statusMessage } = useHomeHook();
+  const { user, isLoading, setIsLoading, statusMessage, setStatusMessage } =
+    useHomeHook();
+
+  const { selectedDate, showDatePicker, handleDateChange, setShowDatePicker } =
+    useUser();
+
+  const handleCreateUser = (v) => {
+    Keyboard.dismiss();
+    setIsLoading(true);
+
+    CreateUser(v);
+
+    setTimeout(() => {
+      setIsLoading(!true);
+      setStatusMessage(true);
+    }, 3000);
+  };
 
   return (
     <Formik
       initialValues={user}
       validationSchema={validationSchema}
-      onSubmit={(values) => {
-        let data = {
-          gender: user.gender,
-          ...values,
-        };
-        onSubmit(data);
+      onSubmit={(v, { resetForm }) => {
+        handleCreateUser(v);
+        resetForm();
       }}
     >
-      {({ values, handleChange, handleSubmit, errors, touched, resetForm }) => (
+      {({
+        values,
+        handleChange,
+        setFieldValue,
+        handleSubmit,
+        errors,
+        touched,
+        resetForm,
+      }) => (
         <View className="items-center justify-start mt-4">
           {statusMessage && (
             <TextSemibold textClassName="text-green-400 text-xl">
-              Registro criado com sucesso!
+              Registro feito com sucesso!
             </TextSemibold>
           )}
           <KeyboardAwareScrollView className="w-[100%] mx-auto p-2 m-0">
@@ -50,7 +74,7 @@ export default function Form() {
                     title="CPF*"
                     maxLength={14}
                     name="document"
-                    value={values.document}
+                    value={formatCPF(values.document)}
                     placeholder="000.000.000-00"
                     keyboardType="decimal-pad"
                     onChange={handleChange("document")}
@@ -121,25 +145,37 @@ export default function Form() {
                   )}
                 </View>
 
-                <View className="flex-col w-[45%]">
-                  <InputGroup
-                    title="Data de nascimento*"
-                    name="birthdate"
-                    value={formatDateToUser(values.birthdate)}
-                    placeholder="dd/mm/aaaa"
-                    keyboardType="numeric"
-                    onChange={handleChange("birthdate")}
-                  />
+                <View className="items-start flex justify-start text-white text-sm border-solid border-b-[1px] border-white py-2 px-2 w-[45%] my-2">
+                  <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+                    <View className="flex-col items-start justify-start">
+                      <TextSemibold textClassName="text-white mb-3">
+                        Data de Nascimento*
+                      </TextSemibold>
+                      <TextLight className="text-white text-sm text-left">
+                        {selectedDate
+                          ? formatDate(selectedDate)
+                          : "Selecionar Data de Nasc."}
+                      </TextLight>
+                    </View>
 
-                  {touched.birthdate && errors.birthdate && (
-                    <ErrorMessage text={errors.birthdate} />
-                  )}
+                    {showDatePicker && (
+                      <RNDateTimePicker
+                        mode="date"
+                        value={values.birthdate}
+                        onChange={(event, selectedDate) => {
+                          handleDateChange(selectedDate);
+                          setFieldValue("birthdate", selectedDate);
+                        }}
+                      />
+                    )}
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
 
             <View className="flex items-center justify-around flex-row mt-4 max-w-full">
               <Button text="Inserir" onPress={handleSubmit} />
+
               <Button text="Recomeçar" onPress={resetForm} />
             </View>
 
@@ -151,7 +187,7 @@ export default function Form() {
               </Link>
             </View>
           </KeyboardAwareScrollView>
-          <Loader isOpen={isLoading} setIsOpen={setIsLoading} />
+          <Loader isOpen={isLoading} />
         </View>
       )}
     </Formik>

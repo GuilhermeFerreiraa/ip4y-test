@@ -2,12 +2,10 @@ import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
 import { TouchableOpacity, View } from "react-native";
+import { formatCPF, formatDate } from "~helpers/utils";
 import { TextMedium, TextRegular } from "./Text";
-import { formatDateToUser } from "~helpers/utils";
 
 export default function UserCard({ data }) {
-  const { name, lastName, document, email, birthdate, gender } = data;
-
   return (
     <View className="flex items-start justify-star flex-1 overflow-hidden mt-4">
       <Link
@@ -30,16 +28,17 @@ export default function UserCard({ data }) {
             <View className="ml-4 flex-col items-start justify-start">
               <View className="flex-row items-center justify-start flex-wrap">
                 <TextMedium textClassName="text-white text-xs">
-                  {name && lastName
-                    ? name + " " + lastName
+                  {data.name && data.lastName
+                    ? data.name + " " + data.lastName
                     : "nome" + " " + "sobrenome"}
                 </TextMedium>
               </View>
               <TextRegular textClassName="text-white text-xs">
-                CPF: {document ? document : "000.000.000-00"}
+                CPF:{" "}
+                {data.document ? formatCPF(data.document) : "000.000.000-00"}
               </TextRegular>
               <TextRegular textClassName="text-white text-xs">
-                {email ? email : "email@email.com"}
+                {data.email ? data.email : "email@email.com"}
               </TextRegular>
             </View>
           </View>
@@ -47,24 +46,24 @@ export default function UserCard({ data }) {
             <View className="justify-start flex-row-reverse items-center mb-2">
               <FontAwesome name="calendar-o" size={12} color="#00C59F" />
               <TextMedium textClassName="text-xs text-white mr-1">
-                {birthdate ? formatDateToUser(birthdate) : "00/00/0000"}
+                {data.birthdate ? formatDate(data.birthdate) : "00/00/0000"}
               </TextMedium>
             </View>
 
             <View className="justify-start flex-row-reverse items-center">
               <Ionicons
                 name={
-                  gender === "female"
+                  data.gender === "female"
                     ? "female"
-                    : gender === "male"
+                    : data.gender === "male"
                     ? "male"
                     : "male-female"
                 }
                 size={14}
-                color={gender !== "male" ? "#00C59F" : "#00D636"}
+                color={data.gender !== "male" ? "#00C59F" : "#00D636"}
               />
               <TextMedium textClassName="capitalize text-xs text-white mr-1">
-                {gender ? gender : "gender"}
+                {data.gender ? data.gender : "gender"}
               </TextMedium>
             </View>
           </View>

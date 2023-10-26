@@ -10,20 +10,8 @@ import Form from "~components/form";
 
 import GradientLine from "~components/gradient-line";
 
-import LogoTitle from "~components/logo";
-
 import SectionTitle from "~components/section-title";
-
-const headerOptions = {
-  title: "iP4y | Instituição de Pagamento",
-  animation: "slide_from_bottom",
-  headerStyle: { backgroundColor: "#090909" },
-  headerTintColor: "#fff",
-  headerTitleStyle: {
-    fontWeight: "bold",
-  },
-  headerTitle: (props) => <LogoTitle {...props} />,
-};
+import { headerOptions } from "./_layout";
 
 export default function Home() {
   return (

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { baseURL } from "./createUser";
+import { baseURL } from "~helpers/utils";
 
 export const getUsers = () => {
   const options = {
@@ -9,7 +9,7 @@ export const getUsers = () => {
   };
 
   try {
-    const res = axios
+    axios
       .request(options)
       .then((response) => {
         return response.data;
